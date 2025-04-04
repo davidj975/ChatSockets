@@ -1,0 +1,44 @@
+package Servidor;
+
+import java.io.*;
+import java.net.*;
+
+public class Servidor {
+    public static void main(String[] args) {
+        int port = 1234;
+        String palabraClave = "STOP";
+
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Inicio Servidor OK");
+            System.out.println("Esperando conexión en el puerto " + port + "...");
+
+            try (Socket clientSocket = serverSocket.accept();
+                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                 BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in))) {
+
+                System.out.println("Cliente conectado... OK");
+
+                String mensaje;
+                while ((mensaje = in.readLine()) != null) {
+                    System.out.println("Cliente: " + mensaje);
+                    if (mensaje.equalsIgnoreCase(palabraClave)) {
+                        System.out.println("Cerrando servidor...");
+                        break;
+                    }
+
+                    System.out.print("Servidor: ");
+                    String respuesta = userInput.readLine();
+                    out.println(respuesta);
+
+                    if (respuesta.equalsIgnoreCase(palabraClave)) {
+                        System.out.println(Cerrando servidor...");
+                        break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error servidor: " + e.getMessage());
+        }
+    }
+}

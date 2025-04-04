@@ -1,0 +1,47 @@
+package Cliente;
+
+import java.io.*;
+import java.net.*;
+
+public class Cliente {
+    public static void main(String[] args) {
+        String host = "localhost";
+        int port = 1234;
+        String palabraClave = "fin";
+
+        try (Socket socket = new Socket(host, port);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in))) {
+
+            System.out.println("Conectado servidor en " + host + ":" + port);
+
+            // Cliente inicia la conversación
+            System.out.print("Cliente: ");
+            String mensaje = userInput.readLine();
+            out.println(mensaje);
+
+            while (true) {
+                String respuesta = in.readLine();
+                if (respuesta == null) break;
+                System.out.println("Servidor: " + respuesta);
+
+                if (respuesta.equalsIgnoreCase(palabraClave)) {
+                    System.out.println("Palabra clave recibida. Cerrando cliente...");
+                    break;
+                }
+
+                System.out.print("Cliente: ");
+                mensaje = userInput.readLine();
+                out.println(mensaje);
+
+                if (mensaje.equalsIgnoreCase(palabraClave)) {
+                    System.out.println("Palabra clave enviada. Cerrando cliente...");
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error en el cliente: " + e.getMessage());
+        }
+    }
+}
