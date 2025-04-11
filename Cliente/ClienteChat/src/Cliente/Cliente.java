@@ -5,44 +5,51 @@ import java.net.*;
 
 public class Cliente {
     public static void main(String[] args) {
-        String host = "localhost";
-        int port = 1234;
-        String palabraClave = "STOP";
-        boolean continuar = true;
+        // Configuración básica
+        String host = "localhost";       // Dirección del servidor
+        int port = 1234;                // Mismo puerto que el servidor
+        String palabraClave = "STOP";    // Palabra para terminar conexión
+        boolean continuar = true;        // Control del bucle principal
 
-        try (Socket socket = new Socket(host, port);
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-             BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in))) {
+        try (
+            // Establece conexión con el servidor
+            Socket socket = new Socket(host, port);
+            
+            // Flujo para recibir mensajes del servidor
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            
+            // Flujo para enviar mensajes al servidor (auto-flush activado)
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            
+            // Flujo para leer entrada del usuario por consola
+            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in))
+        ) {
+            System.out.println("Conectado al servidor en " + host + ":" + port);
 
-            System.out.println("Conexion en " + host + ":" + port);
-
-            System.out.print("Cliente: ");
-            String mensaje = userInput.readLine();
-            out.println(mensaje);
-            continuar = !mensaje.equalsIgnoreCase(palabraClave);
-
+            // Bucle principal de comunicación
             while (continuar) {
-                String respuesta = in.readLine();
-                continuar = respuesta != null && !respuesta.equalsIgnoreCase(palabraClave);
+                // Primero el cliente envía un mensaje
+                System.out.print("Cliente: ");
+                String mensaje = userInput.readLine();
+                out.println(mensaje);
+                continuar = !mensaje.equalsIgnoreCase(palabraClave);
 
-                if (respuesta != null) {
-                    System.out.println("Servidor: " + respuesta);
-                }
-
+                // Luego espera respuesta del servidor
                 if (continuar) {
-                    System.out.print("Cliente: ");
-                    mensaje = userInput.readLine();
-                    out.println(mensaje);
-                    continuar = !mensaje.equalsIgnoreCase(palabraClave);
+                    String respuesta = in.readLine();
+                    if (respuesta == null || respuesta.equalsIgnoreCase(palabraClave)) {
+                        continuar = false;
+                    } else {
+                        System.out.println("Servidor: " + respuesta);
+                    }
                 }
 
                 if (!continuar) {
-                    System.out.println("Adios :c");
+                    System.out.println("Desconectando...");
                 }
             }
         } catch (IOException e) {
-            System.out.println("Error cliente: " + e.getMessage());
+            System.out.println("Error en cliente: " + e.getMessage());
         }
     }
 }
